@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use VM\Cron\Console\CronJobListCommand;
+use VM\Cron\Console\CronJobRunCommand;
 
 /**
  * Cron extension.
@@ -47,10 +48,19 @@ class CronExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
+        // CronJobListCommand console command.
         if (class_exists(Application::class)) {
             $container->register(CronJobListCommand::class)
                 ->setArgument(0, $container->getParameter('cron'))
                 ->addTag('console.command', ['command' => CronJobListCommand::getDefaultName()])
+            ;
+        }
+        // CronJobRunCommand console command.
+        if (class_exists(Application::class)) {
+            $container->register(CronJobRunCommand::class)
+                ->setArgument(0, $container->getParameter('cron'))
+                ->setArgument(1, $container->getParameterBag()->get('kernel.cache_dir'))
+                ->addTag('console.command', ['command' => CronJobRunCommand::getDefaultName()])
             ;
         }
     }

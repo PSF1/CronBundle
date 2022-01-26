@@ -39,8 +39,8 @@ Your site is ready to run cron jobs. Now, write them in a new file named
 ```yaml
 #config/packages/cron.yaml
 cron:
-  - { name: 'Test job 1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
-  - { name: 'Test job 2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
+  - { name: 'Test_job_1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
+  - { name: 'Test_job_2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
 ```
 
 The format is like Cron, from Unix. You must define a job class, that must
@@ -60,3 +60,13 @@ class YourJob implements JobInterface
     }
 }
 ```
+
+## Usage
+
+This bundle allows two work methods.
+
+- Run cron jobs in each request, if it's the time.
+- Run cron jobs by console command.
+
+### Console commands
+- **cron:job:list**: List all defined cron jobs with status.

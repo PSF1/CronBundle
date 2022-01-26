@@ -16,7 +16,8 @@
 namespace VM\Cron\Entity;
 
 use Cron\CronExpression;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Exception;
+use VM\Cron\CronService;
 
 /**
  * Cron job.
@@ -26,21 +27,21 @@ class Cron
 
     private $format;
     private $service;
-    private $container;
     private $name;
+    private $cacheDir;
 
     /**
-     * @param string             $name
-     * @param string             $format
-     * @param string             $service
-     * @param ContainerInterface $container
+     * @param string $name
+     * @param string $format
+     * @param string $service
+     * @param string $cacheDir
      */
-    public function __construct($name, $format, $service, ContainerInterface $container)
+    public function __construct($name, $format, $service, $cacheDir)
     {
         $this->name = $name;
         $this->format = $format;
         $this->service = $service;
-        $this->container = $container;
+        $this->cacheDir = $cacheDir;
     }
 
     /**
@@ -86,19 +87,38 @@ class Cron
     }
 
     /**
-     * Execute cron job.
+     * Execute cron job if it's in time.
      *
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function run()
     {
         $now = new \DateTime('now');
         if ($this->nextRun() <= $now) {
-            $this->container->get($this->service)->run();
-            $this->setLastRun($now);
+            $this->runForced();
         }
+    }
+
+    /**
+     * Execute cron job now.
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function runForced()
+    {
+        $now = new \DateTime('now');
+        try {
+            CronService::validateCronJobClass($this->service);
+        } catch (Exception $e) {
+            throw new Exception(sprintf('%s: %s', $this->service, $e->getMessage()));
+        }
+        $worker = new $this->service();
+        $worker->run();
+        $this->setLastRun($now);
     }
 
     /**
@@ -106,11 +126,11 @@ class Cron
      *
      * @return \DateTime
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function nextRun()
     {
-        $cron = CronExpression::factory($this->format);
+        $cron = new CronExpression($this->format);
 
         return $cron->getNextRunDate($this->getLastRun());
     }
@@ -122,9 +142,7 @@ class Cron
      */
     private function getRoot()
     {
-        $env = $this->container->get('kernel')->getEnvironment();
-
-        $dirname = '../app/cache/'.$env.'/cron';
+        $dirname = $this->cacheDir.'/cron';
 
         if (!is_dir($dirname)) {
             mkdir($dirname, 0755, true);
