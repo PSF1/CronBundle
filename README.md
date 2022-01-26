@@ -46,11 +46,11 @@ imports:
 ```yaml
 #app/cron.yml
 cron:
-    - { format: '*/1 * * * *', service: test_job }
-    - { format: '*/1 * * * *', service: test_job }
+  - { name: 'Test job 1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
+  - { name: 'Test job 2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
 ```
 
-The format is like Cron, from Unix. You must define a service, this service must
+The format is like Cron, from Unix. You must define a job class, that must
 implement `JobInterface` and redefine the run() method.
 Inside run() you can put your Job and do anything you want. You can inject things
 in your service too.

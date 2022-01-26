@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of Symfony Cron Bundle.
+ * This file is part of Cron Bundle.
  *
  * @category bundle
  *

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of Symfony Cron Bundle.
+ * This file is part of Cron Bundle.
  *
  * @category bundle
  *
@@ -36,6 +36,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->prototype('array')
                 ->children()
+                    ->scalarNode('name')->end()
                     ->scalarNode('format')->end()
                     ->scalarNode('service')->end()
                 ->end()

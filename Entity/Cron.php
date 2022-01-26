@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of Symfony Cron Bundle.
+ * This file is part of Cron Bundle.
  *
  * @category bundle
  *
@@ -27,17 +27,30 @@ class Cron
     private $format;
     private $service;
     private $container;
+    private $name;
 
     /**
+     * @param string             $name
      * @param string             $format
      * @param string             $service
      * @param ContainerInterface $container
      */
-    public function __construct($format, $service, ContainerInterface $container)
+    public function __construct($name, $format, $service, ContainerInterface $container)
     {
+        $this->name = $name;
         $this->format = $format;
         $this->service = $service;
         $this->container = $container;
+    }
+
+    /**
+     * Get cron job name.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of Symfony Cron Bundle.
+ * This file is part of Cron Bundle.
  *
  * @category bundle
  *
@@ -57,7 +57,7 @@ class RequestListener
             $crons = $this->container->getParameter('cron');
 
             foreach ($crons as $cron) {
-                $job = new Cron($cron['format'], $cron['service'], $this->container);
+                $job = new Cron($cron['name'], $cron['format'], $cron['service'], $this->container);
                 $job->run();
             }
             $lockHandler->release();

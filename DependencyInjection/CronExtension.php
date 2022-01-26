@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of Symfony Cron Bundle.
+ * This file is part of Cron Bundle.
  *
  * @category bundle
  *
@@ -14,10 +14,12 @@
 
 namespace VM\Cron\DependencyInjection;
 
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use VM\Cron\Console\CronJobListCommand;
 
 /**
  * Cron extension.
@@ -44,5 +46,12 @@ class CronExtension extends Extension
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        if (class_exists(Application::class)) {
+            $container->register(CronJobListCommand::class)
+                ->setArgument(0, $container->getParameter('cron'))
+                ->addTag('console.command', ['command' => CronJobListCommand::getDefaultName()])
+            ;
+        }
     }
 }
