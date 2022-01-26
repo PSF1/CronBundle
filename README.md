@@ -1,8 +1,8 @@
 ## Installation
 
 1. Download CronBundle using composer
-2. Enable the Bundle
-3. Define crons in your config
+2. Enable the Bundle, if required
+3. Define cron jobs in your config
 
 ### Step 1: Download CronBundle using composer
 
@@ -31,20 +31,13 @@ public function registerBundles()
 }
 ```
 
-### Step 3: Define crons in your config
+### Step 3: Define cron jobs in your config
 
-Your site is ready to run crons. Now, write them in the `config.yml` file.
-It's recommended put all crons in a new file named `cron.yml` in your config 
-folder.
+Your site is ready to run cron jobs. Now, write them in a new file named 
+`cron.yml` in your config folder.
 
 ```yaml
-#app/config.yml
-imports:
-    # ...
-    - { resource: cron.yml }
-```
-```yaml
-#app/cron.yml
+#config/packages/cron.yaml
 cron:
   - { name: 'Test job 1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
   - { name: 'Test job 2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
@@ -53,14 +46,15 @@ cron:
 The format is like Cron, from Unix. You must define a job class, that must
 implement `JobInterface` and redefine the run() method.
 Inside run() you can put your Job and do anything you want. You can inject things
-in your service too.
+in your job class too.
 
 ```php
-// AppBundle/Services/YourJob.php
+// src/Cron/YourJob.php
 namespace AppBundle\Services;
 use CronBundle\JobInterface;
 
-class YourJob implements JobInterface{
+class YourJob implements JobInterface
+{
     public function run(){
         // Do your stuff.
     }
