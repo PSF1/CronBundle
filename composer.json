@@ -4,8 +4,11 @@
     "keywords": ["cron"],
     "type": "symfony-bundle",
     "require": {
-        "symfony/symfony": "~2.6",
-        "mtdowling/cron-expression": "^1.0"
+        "php": "^7.4 || ^8.0",
+        "symfony/config": "^5.0 || ^6.0",
+        "setono/cron-expression-bundle": "^1.4",
+        "doctrine/orm": "^2.0",
+        "symfony/lock": "^5.4"
     },
     "license": "GPL-2.0",
     "authors": [

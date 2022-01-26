@@ -1,7 +1,7 @@
 services:
     cronbundle.listener.request:
         class: VM\Cron\EventListener\RequestListener
-        arguments: [ @service_container ]
+        arguments: [ '@service_container' ]
         tags:
            - { name: kernel.event_listener, event: kernel.terminate, method: onKernelTerminate }
 
