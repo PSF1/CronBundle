@@ -70,3 +70,4 @@ This bundle allows two work methods.
 
 ### Console commands
 - **cron:job:list**: List all defined cron jobs with status.
+- **cron:job:run**: Run cron jobs.
