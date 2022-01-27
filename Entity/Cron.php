@@ -87,6 +87,20 @@ class Cron
     }
 
     /**
+     * Is this job in time to execute?
+     *
+     * @return bool
+     *
+     * @throws Exception
+     */
+    public function intoFormat()
+    {
+        $now = new \DateTime('now');
+
+        return ($this->nextRun() <= $now);
+    }
+
+    /**
      * Execute cron job if it's in time.
      *
      * @return void

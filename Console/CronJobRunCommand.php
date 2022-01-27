@@ -74,11 +74,25 @@ class CronJobRunCommand extends Command
             if ($jobName && $job['name'] !== $jobName) {
                 continue;
             }
+            $name = $job['name'];
+            $io->title($name);
             $job = new Cron($job['name'], $job['format'], $job['service'], $this->cacheDir);
-            if ($force) {
-                $job->runForced();
-            } else {
-                $job->run();
+            $executed = true;
+            try {
+                if ($force) {
+                    $job->runForced();
+                } else {
+                    if (!$job->intoFormat()) {
+                        $io->warning(sprintf('Job "%s" it\'s not in time to execute it', $name));
+                        $executed = false;
+                    }
+                    $job->run();
+                }
+                if ($executed) {
+                    $io->success(sprintf('Job "%s" executed', $name));
+                }
+            } catch (Exception $e) {
+                $io->error($e->getMessage());
             }
         }
 
