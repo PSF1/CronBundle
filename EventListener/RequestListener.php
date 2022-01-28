@@ -15,6 +15,8 @@
 
 namespace VM\Cron\EventListener;
 
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\Lock\LockFactory;
@@ -25,18 +27,34 @@ use VM\Cron\Entity\Cron;
  */
 class RequestListener
 {
-
-    private ContainerInterface $container;
     private LockFactory $factory;
+    private $cacheDir;
+    /**
+     * @var array|bool|float|int|string|null
+     */
+    private $jobs;
+    private LoggerInterface $logger;
+    /**
+     * @var bool
+     */
+    private $runOnRequest;
 
     /**
      * @param ContainerInterface $container
      * @param LockFactory        $factory
+     * @param LoggerInterface    $logger
      */
-    public function __construct(ContainerInterface $container, LockFactory $factory)
+    public function __construct(ContainerInterface $container, LockFactory $factory, LoggerInterface $logger)
     {
-        $this->container = $container;
+        $this->cacheDir = $container->getParameterBag()->get('kernel.cache_dir');
+
+        $cronConfig = $container->getParameter('cron');
+        $this->jobs = (isset($cronConfig['jobs'])) ? $cronConfig['jobs'] : [];
+
+        $this->runOnRequest = (isset($cronConfig['run_on_request'])) ? $cronConfig['run_on_request'] : false;
+
         $this->factory = $factory;
+        $this->logger = $logger;
     }
 
     /**
@@ -46,21 +64,29 @@ class RequestListener
      *
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function onKernelTerminate(TerminateEvent $event)
     {
-        $lockHandler = $this->factory->createLock('cron.lock');
+        if (!$this->runOnRequest) {
+            return;
+        }
+
+        $lockHandler = $this->factory->createLock('cron.request.lock');
         $lockHandler->acquire();
 
-        if ($lockHandler->isAcquired()) {
-            $crons = $this->container->getParameter('cron');
-
-            foreach ($crons as $cron) {
-                $job = new Cron($cron['name'], $cron['format'], $cron['service'], $this->container);
-                $job->run();
-            }
-            $lockHandler->release();
+        if (!$lockHandler->isAcquired()) {
+            return;
         }
+
+        foreach ($this->jobs as $cron) {
+            try {
+                $job = new Cron($cron['name'], $cron['format'], $cron['service'], $this->cacheDir, $this->factory, $this->logger);
+                $job->run();
+            } catch (Exception $e) {
+                // Ignore errors.
+            }
+        }
+        $lockHandler->release();
     }
 }

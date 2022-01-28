@@ -58,6 +58,7 @@ class CronExtension extends Extension
         // CronJobRunCommand console command.
         if (class_exists(Application::class)) {
             $container->register(CronJobRunCommand::class)
+                ->setAutowired(true)
                 ->setArgument(0, $container->getParameter('cron'))
                 ->setArgument(1, $container->getParameterBag()->get('kernel.cache_dir'))
                 ->addTag('console.command', ['command' => CronJobRunCommand::getDefaultName()])

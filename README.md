@@ -16,6 +16,8 @@ Composer will install the bundle to your project's `vendor/valentinmari` directo
 
 ### Step 2: Enable the bundle
 
+If you are using Flex this step it's not required.
+
 Enable the bundle in the kernel:
 
 ``` php
@@ -38,9 +40,15 @@ Your site is ready to run cron jobs. Now, write them in a new file named
 
 ```yaml
 #config/packages/cron.yaml
+
+# Cron jobs.
 cron:
-  - { name: 'Test_job_1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
-  - { name: 'Test_job_2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
+  jobs:
+    - { name: 'Test_job_1', format: '*/1 * * * *', service: 'App\Cron\TestJob1' }
+    - { name: 'Test_job_2', format: '*/1 * * * *', service: 'App\Cron\TestJob2' }
+
+  # Uncomment to execute jobs after each user request.
+  # run_on_request: true
 ```
 
 The format is like Cron, from Unix. You must define a job class, that must
@@ -65,7 +73,8 @@ class YourJob implements JobInterface
 
 This bundle allows two work methods.
 
-- Run cron jobs in each request, if it's the time.
+- Run cron jobs in each request, if it's the time. Note that you must define job 
+format with enough time to not duplicate executions.
 - Run cron jobs by console command.
 
 ### Console commands

@@ -34,12 +34,17 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
-            ->prototype('array')
-                ->children()
-                    ->scalarNode('name')->end()
-                    ->scalarNode('format')->end()
-                    ->scalarNode('service')->end()
+            ->children()
+            ->arrayNode('jobs')
+                ->prototype('array')
+                    ->children()
+                        ->scalarNode('name')->end()
+                        ->scalarNode('format')->end()
+                        ->scalarNode('service')->end()
+                    ->end()
                 ->end()
+            ->end()
+            ->booleanNode('run_on_request')
             ->end()
         ;
 

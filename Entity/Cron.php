@@ -17,6 +17,8 @@ namespace VM\Cron\Entity;
 
 use Cron\CronExpression;
 use Exception;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Lock\LockFactory;
 use VM\Cron\CronService;
 
 /**
@@ -29,19 +31,25 @@ class Cron
     private $service;
     private $name;
     private $cacheDir;
+    private LockFactory $factory;
+    private LoggerInterface $logger;
 
     /**
-     * @param string $name
-     * @param string $format
-     * @param string $service
-     * @param string $cacheDir
+     * @param string          $name
+     * @param string          $format
+     * @param string          $service
+     * @param string          $cacheDir
+     * @param LockFactory     $factory
+     * @param LoggerInterface $logger
      */
-    public function __construct($name, $format, $service, $cacheDir)
+    public function __construct($name, $format, $service, $cacheDir, LockFactory $factory, LoggerInterface $logger)
     {
         $this->name = $name;
         $this->format = $format;
         $this->service = $service;
         $this->cacheDir = $cacheDir;
+        $this->factory = $factory;
+        $this->logger = $logger;
     }
 
     /**
@@ -124,15 +132,29 @@ class Cron
      */
     public function runForced()
     {
-        $now = new \DateTime('now');
-        try {
-            CronService::validateCronJobClass($this->service);
-        } catch (Exception $e) {
-            throw new Exception(sprintf('%s: %s', $this->service, $e->getMessage()));
+        $lockHandler = $this->factory->createLock('cron.lock');
+        $lockHandler->acquire();
+
+        if ($lockHandler->isAcquired()) {
+            try {
+                $now = new \DateTime('now');
+                CronService::validateCronJobClass($this->service);
+            } catch (Exception $e) {
+                $this->logger->debug(sprintf('Cron job %s fail: %s. Lock released.', $this->service, $e->getMessage()));
+                $this->setLastRun($now);
+                $lockHandler->release();
+                throw new Exception(sprintf('%s: %s', $this->service, $e->getMessage()));
+            }
+            // Ensure that the lock will be released.
+            try {
+                $worker = new $this->service();
+                $worker->run();
+                $this->setLastRun($now);
+            } finally {
+                $lockHandler->release();
+                $this->logger->debug(sprintf('Cron job "%s" executed. Lock released.', $this->getName()));
+            }
         }
-        $worker = new $this->service();
-        $worker->run();
-        $this->setLastRun($now);
     }
 
     /**

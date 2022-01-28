@@ -17,12 +17,14 @@ declare(strict_types=1);
 namespace VM\Cron\Console;
 
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Lock\LockFactory;
 use VM\Cron\CronService;
 use VM\Cron\Entity\Cron;
 
@@ -34,16 +36,22 @@ class CronJobRunCommand extends Command
     protected static $defaultName = 'cron:job:run';
     private array $jobs;
     private $cacheDir;
+    private LockFactory $factory;
+    private LoggerInterface $logger;
 
     /**
-     * @param array  $jobs
-     * @param string $cacheDir
+     * @param array           $jobs
+     * @param string          $cacheDir
+     * @param LockFactory     $factory
+     * @param LoggerInterface $logger
      */
-    public function __construct(array $jobs, $cacheDir)
+    public function __construct(array $jobs, $cacheDir, LockFactory $factory, LoggerInterface $logger)
     {
         parent::__construct(self::$defaultName);
         $this->jobs = $jobs;
         $this->cacheDir = $cacheDir;
+        $this->factory = $factory;
+        $this->logger = $logger;
     }
 
     /**
@@ -76,7 +84,7 @@ class CronJobRunCommand extends Command
             }
             $name = $job['name'];
             $io->title($name);
-            $job = new Cron($job['name'], $job['format'], $job['service'], $this->cacheDir);
+            $job = new Cron($job['name'], $job['format'], $job['service'], $this->cacheDir, $this->factory, $this->logger);
             $executed = true;
             try {
                 if ($force) {
