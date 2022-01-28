@@ -32,12 +32,12 @@ class CronJobListCommand extends Command
     private array $jobs;
 
     /**
-     * @param array $jobs
+     * @param array $cronConfig
      */
-    public function __construct(array $jobs)
+    public function __construct(array $cronConfig)
     {
         parent::__construct(self::$defaultName);
-        $this->jobs = $jobs;
+        $this->jobs = (isset($cronConfig['jobs'])) ? $cronConfig['jobs'] : [];
     }
 
     /**

@@ -40,15 +40,15 @@ class CronJobRunCommand extends Command
     private LoggerInterface $logger;
 
     /**
-     * @param array           $jobs
+     * @param array           $cronConfig
      * @param string          $cacheDir
      * @param LockFactory     $factory
      * @param LoggerInterface $logger
      */
-    public function __construct(array $jobs, $cacheDir, LockFactory $factory, LoggerInterface $logger)
+    public function __construct(array $cronConfig, $cacheDir, LockFactory $factory, LoggerInterface $logger)
     {
         parent::__construct(self::$defaultName);
-        $this->jobs = $jobs;
+        $this->jobs = (isset($cronConfig['jobs'])) ? $cronConfig['jobs'] : [];
         $this->cacheDir = $cacheDir;
         $this->factory = $factory;
         $this->logger = $logger;
