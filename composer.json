@@ -1,11 +1,11 @@
 {
-    "name": "valentinmari/cron-bundle",
-    "description": "Manage dynamically crons with requests in your PHP site.",
+    "name": "psf1/cron-bundle",
+    "description": "Manage dynamically cron jobs with requests, or command, in your PHP site.",
     "keywords": ["cron"],
     "type": "symfony-bundle",
     "require": {
         "php": "^7.4 || ^8.0",
-        "symfony/config": "^5.0 || ^6.0",
+        "symfony/config": "^5.4 || ^6.0",
         "setono/cron-expression-bundle": "^1.4",
         "doctrine/orm": "^2.0",
         "symfony/lock": "^5.4"
@@ -15,6 +15,10 @@
         {
             "name": "Valentin Mari",
             "email": "valentinmari@hotmail.com"
+        },
+        {
+            "name": "Pedro Pelaez",
+            "email": "aaaaa976@gmail.com"
         }
     ],
     "autoload" : {

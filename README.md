@@ -1,3 +1,5 @@
+This bundle it's a fork from '[valentinmari/cron-bundle](https://github.com/vmari/CronBundle)', original code by Valentin Mari.
+
 ## Installation
 
 1. Download CronBundle using composer
