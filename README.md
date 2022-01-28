@@ -11,10 +11,10 @@ This bundle it's a fork from '[valentinmari/cron-bundle](https://github.com/vmar
 Add CronBundle by running the command:
 
 ``` bash
-$ php composer.phar require valentinmari/cron-bundle "dev-master"
+$ php composer.phar require psf1/cron-bundle "dev-master"
 ```
 
-Composer will install the bundle to your project's `vendor/valentinmari` directory.
+Composer will install the bundle to your project's `vendor/psf1` directory.
 
 ### Step 2: Enable the bundle
 
