@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace VM\Cron\Console;
 
 use Exception;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -45,10 +46,16 @@ class CronJobRunCommand extends Command
      * @param LockFactory     $factory
      * @param LoggerInterface $logger
      */
-    public function __construct(array $cronConfig, $cacheDir, LockFactory $factory, LoggerInterface $logger)
+    public function __construct(array $cronConfig, $cacheDir, LockFactory $factory, LoggerInterface $logger, ContainerInterface $container)
     {
         parent::__construct(self::$defaultName);
         $this->jobs = (isset($cronConfig['jobs'])) ? $cronConfig['jobs'] : [];
+        foreach ($this->jobs as &$job) {
+            if (isset($job['service'])) {
+                // Get service instance with autowiring if configured.
+                $job['service'] = $container->get($job['service']);
+            }
+        }
         $this->cacheDir = $cacheDir;
         $this->factory = $factory;
         $this->logger = $logger;

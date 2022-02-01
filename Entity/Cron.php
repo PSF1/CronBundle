@@ -37,7 +37,7 @@ class Cron
     /**
      * @param string          $name
      * @param string          $format
-     * @param string          $service
+     * @param mixed           $service
      * @param string          $cacheDir
      * @param LockFactory     $factory
      * @param LoggerInterface $logger
@@ -136,18 +136,23 @@ class Cron
         $lockHandler->acquire();
 
         if ($lockHandler->isAcquired()) {
+            $serviceClass = (is_string($this->service) ? $this->service : get_class($this->service));
             try {
                 $now = new \DateTime('now');
-                CronService::validateCronJobClass($this->service);
+                CronService::validateCronJobClass($serviceClass);
             } catch (Exception $e) {
-                $this->logger->debug(sprintf('Cron job %s fail: %s. Lock released.', $this->service, $e->getMessage()));
+                $this->logger->debug(sprintf('Cron job %s fail: %s. Lock released.', $serviceClass, $e->getMessage()));
                 $this->setLastRun($now);
                 $lockHandler->release();
-                throw new Exception(sprintf('%s: %s', $this->service, $e->getMessage()));
+                throw new Exception(sprintf('%s: %s', $serviceClass, $e->getMessage()));
             }
             // Ensure that the lock will be released.
             try {
-                $worker = new $this->service();
+                if (is_object($this->service)) {
+                    $worker = $this->service;
+                } else {
+                    $worker = new $this->service();
+                }
                 $worker->run();
                 $this->setLastRun($now);
             } finally {
@@ -194,6 +199,7 @@ class Cron
      */
     private function getFileCacheName()
     {
-        return $this->getRoot().'/'.md5($this->format.$this->service).'.cron';
+        $serviceClass = (is_string($this->service) ? $this->service : get_class($this->service));
+        return $this->getRoot().'/'.md5($this->format.$serviceClass).'.cron';
     }
 }

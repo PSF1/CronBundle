@@ -50,6 +50,12 @@ class RequestListener
 
         $cronConfig = $container->getParameter('cron');
         $this->jobs = (isset($cronConfig['jobs'])) ? $cronConfig['jobs'] : [];
+        foreach ($this->jobs as &$job) {
+            if (isset($job['service'])) {
+                // Get service instance with autowiring if configured.
+                $job['service'] = $container->get($job['service']);
+            }
+        }
 
         $this->runOnRequest = (isset($cronConfig['run_on_request'])) ? $cronConfig['run_on_request'] : false;
 
