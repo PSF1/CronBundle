@@ -11,12 +11,19 @@ This bundle it's a fork from '[valentinmari/cron-bundle](https://github.com/vmar
 Add CronBundle by running the command:
 
 ``` bash
-$ php composer.phar require psf1/cron-bundle
+$ composer require psf1/cron-bundle
 ```
 
 Composer will install the bundle to your project's `vendor/psf1` directory.
 
 ### Step 2: Enable the bundle
+
+Edit your .env file and set the `LOCK_DSN` value.
+```
+# /.env.local
+
+LOCK_DSN=flock
+```
 
 If you are using Flex this step it's not required.
 
@@ -59,16 +66,49 @@ Inside run() you can put your Job and do anything you want. You can inject thing
 in your job class too.
 
 ```php
-// src/Cron/YourJob.php
-namespace AppBundle\Services;
-use CronBundle\JobInterface;
+// src/Cron/CacheClearCron.php
+namespace App\Cron;
 
-class YourJob implements JobInterface
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpKernel\KernelInterface;
+use VM\Cron\JobInterface;
+
+/**
+ * Run cache clear job.
+ */
+class CacheClearCron implements JobInterface
 {
-    public function run(){
-        // Do your stuff.
+    protected ?Application $application;
+
+    /**
+     * @param KernelInterface $kernel
+     */
+    public function __construct(KernelInterface $kernel)
+    {
+        $this->application = new Application($kernel);
+        $this->application->setAutoExit(false);
+    }
+
+    /**
+     * Execute job.
+     *
+     * @return void
+     *
+     * @throws \Exception
+     */
+    public function run(): void
+    {
+        $input = new ArrayInput([
+            'command' => 'cache:clear',
+        ]);
+
+        $output = new NullOutput();
+        $this->application->run($input, $output);
     }
 }
+
 ```
 
 ## Usage

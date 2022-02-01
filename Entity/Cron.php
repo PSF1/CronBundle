@@ -200,6 +200,7 @@ class Cron
     private function getFileCacheName()
     {
         $serviceClass = (is_string($this->service) ? $this->service : get_class($this->service));
+
         return $this->getRoot().'/'.md5($this->format.$serviceClass).'.cron';
     }
 }

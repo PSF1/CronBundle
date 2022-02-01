@@ -41,10 +41,14 @@ class CronJobRunCommand extends Command
     private LoggerInterface $logger;
 
     /**
-     * @param array           $cronConfig
-     * @param string          $cacheDir
-     * @param LockFactory     $factory
-     * @param LoggerInterface $logger
+     * @param array              $cronConfig
+     * @param string             $cacheDir
+     * @param LockFactory        $factory
+     * @param LoggerInterface    $logger
+     * @param ContainerInterface $container
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function __construct(array $cronConfig, $cacheDir, LockFactory $factory, LoggerInterface $logger, ContainerInterface $container)
     {
